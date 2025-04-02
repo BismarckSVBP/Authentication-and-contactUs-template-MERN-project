@@ -82,20 +82,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Routes
-app.use("/", authRoutes);
+app.use("/api", authRoutes); // Optional: Use "/api" to avoid conflicts
 
-// Database connection before starting the server
-const startServer = async () => {
-	try {
-		await connectDB();
-		console.log("✅ Database connected successfully!");
-	} catch (error) {
-		console.error("❌ Database connection failed:", error);
-		process.exit(1);
-	}
-};
+// Connect to database once
+connectDB().then(() => console.log("✅ Database connected successfully!")).catch(err => {
+	console.error("❌ Database connection failed:", err);
+	process.exit(1);
+});
 
-startServer();
-
-// Export for Vercel
+// ✅ Export a function for Vercel
 export default app;
