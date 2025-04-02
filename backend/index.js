@@ -1,35 +1,55 @@
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import path from "path";
-
 import { connectDB } from "./db/connectDB.js";
-
 import authRoutes from "./routes/auth.route.js";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-
-app.use(express.json()); // allows us to parse incoming requests:req.body
-app.use(cookieParser()); // allows us to parse incoming cookies
-
-app.use("/api/auth", authRoutes);
-
-if (process.env.NODE_ENV === "production") {
-	app.use(express.static(path.join(__dirname, "/frontend/dist")));
-
-	app.get("*", (req, res) => {
-		res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-	});
+// Ensure CLIENT_URL exists
+if (!process.env.CLIENT_URL) {
+	console.error("⚠️ CLIENT_URL is not set in the environment variables.");
+	process.exit(1);
 }
 
-app.listen(PORT, () => {
-	connectDB();
-	console.log("Server is running on port: ", PORT);
+app.use(
+	cors({
+		origin: process.env.CLIENT_URL,
+		credentials: true,
+		optionsSuccessStatus: 200,
+	})
+);
+
+app.use(express.json());
+app.use(cookieParser());
+
+// Routes
+app.use("/", authRoutes);
+
+// Database connection before starting the server
+const startServer = async () => {
+	try {
+		await connectDB();
+		console.log("✅ Database connected successfully!");
+
+		app.listen(PORT, () => {
+			console.log(`🚀 Server is running on port: ${PORT}`);
+		});
+	} catch (error) {
+		console.error("❌ Database connection failed:", error);
+		process.exit(1);
+	}
+};
+
+startServer();
+
+// Graceful shutdown handling
+process.on("SIGINT", async () => {
+	console.log("🔄 Closing server...");
+	process.exit(0);
 });
