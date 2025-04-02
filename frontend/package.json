@@ -1,6 +1,5 @@
 {
-  "name": "frontend",
-  "private": true,
+  "name": "auth-frontend",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -12,6 +11,7 @@
   "dependencies": {
     "auth-tutorial": "file:..",
     "axios": "^1.7.3",
+    "dotenv": "^16.4.7",
     "framer-motion": "^11.3.21",
     "lucide-react": "^0.424.0",
     "paytm": "file:..",
